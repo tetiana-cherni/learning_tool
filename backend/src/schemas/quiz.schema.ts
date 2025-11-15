@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+  MIN_QUESTION_AMOUNT,
+  MAX_QUESTION_AMOUNT,
+} from "../constants/quiz.constants";
 
 export const QuizQuestionSchema = z.object({
   id: z.string().describe("Unique identifier for the question"),
@@ -16,59 +20,10 @@ export const QuizQuestionSchema = z.object({
 export const QuizQuestionsSchema = z.object({
   questions: z
     .array(QuizQuestionSchema)
-    .min(5)
-    .max(10)
+    .min(MIN_QUESTION_AMOUNT)
+    .max(MAX_QUESTION_AMOUNT)
     .describe("Array of quiz questions"),
 });
 
 export type QuizQuestion = z.infer<typeof QuizQuestionSchema>;
 export type QuizQuestions = z.infer<typeof QuizQuestionsSchema>;
-
-// Plain JSON Schema compatible with @google/genai structured outputs
-export const QuizQuestionsJsonSchema = {
-  type: "object",
-  properties: {
-    questions: {
-      type: "array",
-      description: "Array of quiz questions",
-      minItems: 5,
-      maxItems: 10,
-      items: {
-        type: "object",
-        properties: {
-          id: {
-            type: "string",
-            description: "Unique identifier for the question",
-          },
-          question: {
-            type: "string",
-            description: "The quiz question text",
-          },
-          options: {
-            type: "array",
-            description: "Four answer options",
-            minItems: 4,
-            maxItems: 4,
-            items: {
-              type: "string",
-            },
-          },
-          correctAnswer: {
-            type: "integer",
-            description: "Index of the correct answer (0-3)",
-            minimum: 0,
-            maximum: 3,
-          },
-          explanation: {
-            type: "string",
-            description: "Explanation of the correct answer",
-          },
-        },
-        required: ["id", "question", "options", "correctAnswer", "explanation"],
-        additionalProperties: false,
-      },
-    },
-  },
-  required: ["questions"],
-  additionalProperties: false,
-} as const;
