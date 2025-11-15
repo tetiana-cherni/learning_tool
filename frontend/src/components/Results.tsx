@@ -6,12 +6,12 @@ import { QuizResult } from '../App';
 
 type ResultsProps = {
   result: QuizResult;
-  onRetake: () => void;
+  onRetryQuiz: (url: string, questionCount: number, subject: string, title: string) => void;
   onNewQuiz: () => void;
   onViewProfile: () => void;
 };
 
-export function Results({ result, onRetake, onNewQuiz, onViewProfile }: ResultsProps) {
+export function Results({ result, onRetryQuiz, onNewQuiz, onViewProfile }: ResultsProps) {
   const [showDetailedResults, setShowDetailedResults] = useState(false);
   const percentage = Math.round((result.score / result.totalQuestions) * 100);
   const isPerfect = percentage === 100;
@@ -49,7 +49,10 @@ export function Results({ result, onRetake, onNewQuiz, onViewProfile }: ResultsP
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Button onClick={onRetake} variant="outline" className="gap-2 dark:border-gray-600 dark:hover:bg-gray-800">
+        <Button onClick={(e) => {
+                            e.stopPropagation();
+                            onRetryQuiz(result.url, result.totalQuestions, result.subject, result.title);
+                          }} variant="outline" className="gap-2 dark:border-gray-600 dark:hover:bg-gray-800">
           <RotateCcw className="w-4 h-4" />
           Retake Quiz
         </Button>
