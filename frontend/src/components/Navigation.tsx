@@ -27,7 +27,7 @@ export function Navigation({ currentPage, onNavigate, onLogout, onLogin, isAuthe
             <BookOpen className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
             <span className="text-gray-900 dark:text-gray-100">LearnQuiz</span>
           </div>
-          
+
           <div className="flex gap-2">
             <Button
               variant={currentPage === 'home' ? 'default' : 'ghost'}
@@ -50,19 +50,6 @@ export function Navigation({ currentPage, onNavigate, onLogout, onLogin, isAuthe
 				)
 			}
 
-            <Button
-              variant="ghost"
-              onClick={toggleTheme}
-              className="gap-2"
-              aria-label="Toggle theme"
-            >
-              {theme === 'light' ? (
-                <Moon className="w-4 h-4" />
-              ) : (
-                <Sun className="w-4 h-4" />
-              )}
-            </Button>
-
 			  {isAuthenticated && onLogout && (
               <Button
                 variant="ghost"
@@ -84,6 +71,19 @@ export function Navigation({ currentPage, onNavigate, onLogout, onLogin, isAuthe
                 Login
               </Button>
             )}
+
+			<Button
+              variant="ghost"
+              onClick={toggleTheme}
+              className="gap-2"
+              aria-label="Toggle theme"
+            >
+              {theme === 'light' ? (
+                <Moon className="w-4 h-4" />
+              ) : (
+                <Sun className="w-4 h-4" />
+              )}
+            </Button>
 
           </div>
         </div>

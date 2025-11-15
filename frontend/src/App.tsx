@@ -6,6 +6,8 @@ import { Profile } from './components/Profile';
 import { Navigation } from './components/Navigation';
 import { ThemeProvider } from './components/ThemeProvider';
 import { Login } from './components/Login';
+import { useAuth0 } from "@auth0/auth0-react";
+import createAuth0Client from "@auth0/auth0-spa-js";
 
 export type QuizQuestion = {
   id: string;
@@ -31,18 +33,17 @@ export type QuizResult = {
 type Page = 'login' | 'home' | 'quiz' | 'results' | 'profile';
 
 export default function App() {
+  const { isAuthenticated, isLoading, error, loginWithRedirect, logout } = useAuth0();
   const [currentPage, setCurrentPage] = useState<Page>('home');
   const [currentUrl, setCurrentUrl] = useState('');
   const [currentSubject, setCurrentSubject] = useState('');
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
   const [currentResult, setCurrentResult] = useState<QuizResult | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const authStatus = localStorage.getItem('isAuthenticated');
     if (authStatus === 'true') {
-      setIsAuthenticated(true);
       setCurrentPage('home');
     }
   }, []);
@@ -71,6 +72,8 @@ export default function App() {
     localStorage.setItem('quizResults', JSON.stringify(quizResults));
   }, [quizResults]);
 
+
+  
   const handleUrlSubmit = (url: string, questionCount: number, subject: string) => {
     setCurrentUrl(url);
     // If no subject is provided, try to extract from URL or use 'Uncategorized'
@@ -145,16 +148,17 @@ export default function App() {
   };
 
   const handleLogin = ( isAnonymusUser: boolean ) => {
+    // useAuth0 hooks must be called at component top-level; use the destructured function here
+    loginWithRedirect();
+    if (!isAnonymusUser) {
+      localStorage.setItem('isAuthenticated', 'true');
+    }
     setCurrentPage('home');
-	if (!isAnonymusUser)
-	{
-		setIsAuthenticated(true);
-		localStorage.setItem('isAuthenticated', 'true');
-	}
   };
 
   const handleLogout = () => {
-    setIsAuthenticated(false);
+    // use the logout function obtained from useAuth0 at the component top-level
+    logout({ logoutParams: { returnTo: window.location.origin } });
     setCurrentPage('home');
     localStorage.setItem('isAuthenticated', 'false');
   };
@@ -162,7 +166,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
-        <Navigation currentPage={currentPage} onLogout={handleLogout} onLogin={handleLoginButton} onNavigate={handleNavigate} isAuthenticated={isAuthenticated} />
+        <Navigation currentPage={currentPage} onLogout={handleLogout} onLogin={handleLogin} onNavigate={handleNavigate} isAuthenticated={isAuthenticated} />
         
         <main className={`container mx-auto px-4 py-8 ${currentPage === 'profile' ? 'max-w-6xl' : 'max-w-4xl'}`}>
           {currentPage === 'login' && (
