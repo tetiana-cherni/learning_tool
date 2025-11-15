@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle2, Circle, Clock, ExternalLink, XCircle, AlertCircle } from 'lucide-react';
+import { CheckCircle2, Circle, Clock, ExternalLink, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Progress } from './ui/progress';
@@ -13,15 +13,32 @@ type QuizProps = {
 
 export function Quiz({ questions, onComplete, url }: QuizProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [amountOfSubmitedQuestions, setamountOfSubmitedQuestions] = useState(1);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
   const [submittedAnswers, setSubmittedAnswers] = useState<Record<string, boolean>>({});
   const [startTime] = useState(Date.now());
   const [timeElapsed, setTimeElapsed] = useState(0);
+  const [paginationStart, setPaginationStart] = useState(0);
+
+  const MAX_VISIBLE_PAGES = 5;
+
+  // Automatically adjust pagination window when question changes
+  useEffect(() => {
+    if (currentQuestionIndex < paginationStart) {
+      // Moving backwards - jump to the page that contains this question
+      const newStart = Math.floor(currentQuestionIndex / MAX_VISIBLE_PAGES) * MAX_VISIBLE_PAGES;
+      setPaginationStart(newStart);
+    } else if (currentQuestionIndex >= paginationStart + MAX_VISIBLE_PAGES) {
+      // Moving forwards - jump to the page that contains this question
+      const newStart = Math.floor(currentQuestionIndex / MAX_VISIBLE_PAGES) * MAX_VISIBLE_PAGES;
+      setPaginationStart(Math.min(
+        questions.length - MAX_VISIBLE_PAGES,
+        newStart
+      ));
+    }
+  }, [currentQuestionIndex, questions.length]);
 
   const currentQuestion = questions[currentQuestionIndex];
-  const progress = ((amountOfSubmitedQuestions - 1) / questions.length) * 100;
-  const isLastQuestion = currentQuestionIndex === questions.length - 1;
+  const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
   const hasSelected = selectedAnswers[currentQuestion.id] !== undefined;
   const hasSubmitted = submittedAnswers[currentQuestion.id] === true;
   const selectedAnswer = selectedAnswers[currentQuestion.id];
@@ -46,32 +63,30 @@ export function Quiz({ questions, onComplete, url }: QuizProps) {
   };
 
   const handleSubmitAnswer = () => {
-    setamountOfSubmitedQuestions(amountOfSubmitedQuestions + 1);
-    console.log(amountOfSubmitedQuestions);
     setSubmittedAnswers({
       ...submittedAnswers,
       [currentQuestion.id]: true,
     });
-
+    
     // Automatically navigate to next question or complete quiz
     if (currentQuestionIndex < questions.length - 1) {
-        setTimeout(() => {
-            setCurrentQuestionIndex(currentQuestionIndex + 1);
-        }, 100);
-        } else {
-        // All questions answered, submit quiz
-        setTimeout(() => {
-            const score = questions.reduce((acc, question) => {
-            if (selectedAnswers[question.id] === question.correctAnswer) {
-                return acc + 1;
-            }
-            return acc;
-            }, 0);
+      setTimeout(() => {
+        setCurrentQuestionIndex(currentQuestionIndex + 1);
+      }, 100);
+    } else {
+      // All questions answered, submit quiz
+      setTimeout(() => {
+        const score = questions.reduce((acc, question) => {
+          if (selectedAnswers[question.id] === question.correctAnswer) {
+            return acc + 1;
+          }
+          return acc;
+        }, 0);
 
-            const timeSpent = Math.floor((Date.now() - startTime) / 1000);
-            onComplete(score, timeSpent, selectedAnswers);
-        }, 100);
-        }
+        const timeSpent = Math.floor((Date.now() - startTime) / 1000);
+        onComplete(score, timeSpent, selectedAnswers);
+      }, 100);
+    }
   };
 
   const handleNext = () => {
@@ -155,18 +170,23 @@ export function Quiz({ questions, onComplete, url }: QuizProps) {
 
             if (hasSubmitted) {
               // After submission, show correct answer in green
-            if (isSelected) {
-                buttonStyle = 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 dark:border-indigo-400';
-                iconComponent = <CheckCircle2 className="w-5 h-5 text-indigo-600 dark:text-indigo-400 flex-shrink-0" />;
-                textStyle = 'text-indigo-900 dark:text-indigo-200';
+              if (isCorrectOption) {
+                buttonStyle = 'border-green-600 bg-green-50 dark:bg-green-900/30 dark:border-green-500';
+                iconComponent = <CheckCircle2 className="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0" />;
+                textStyle = 'text-green-900 dark:text-green-200';
+              } 
+              // Show user's incorrect answer in red
+              else if (isSelected) {
+                buttonStyle = 'border-red-600 bg-red-50 dark:bg-red-900/30 dark:border-red-500';
+                iconComponent = <XCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />;
+                textStyle = 'text-red-900 dark:text-red-200';
               }
               // Other options stay neutral
               else {
-                buttonStyle = 'border-dark-gray-400 bg-dark-gray-200 dark:border-gray-800 dark:bg-gray-900/70';
+                buttonStyle = 'border-gray-200 bg-gray-50 dark:border-gray-600 dark:bg-gray-700/50';
                 iconComponent = <Circle className="w-5 h-5 text-gray-400 dark:text-gray-500 flex-shrink-0" />;
                 textStyle = 'text-gray-600 dark:text-gray-400';
               }
-
             } else {
               // Before submission, just show selection state
               if (isSelected) {
@@ -208,23 +228,33 @@ export function Quiz({ questions, onComplete, url }: QuizProps) {
           Previous
         </Button>
 
-          <div className="flex gap-2">
+        <div className="flex gap-2">
           <Button
             onClick={handleSubmitAnswer}
-            disabled={ currentQuestionIndex < questions.length - 1
-                ? !hasSelected
-                : amountOfSubmitedQuestions < questions.length}
+            disabled={!hasSelected}
             className="bg-indigo-600 hover:bg-indigo-700"
           >
-                {currentQuestionIndex < questions.length - 1
-                ? "Submit"
-                : "Finish quiz"}
+            Submit
           </Button>
         </div>
       </div>
 
-      <div className="mt-6 flex justify-center gap-2">
-        {questions.map((q, index) => {
+      <div className="mt-6 flex justify-center items-center gap-2">
+        {questions.length > MAX_VISIBLE_PAGES && (
+          <button
+            onClick={() => setPaginationStart(Math.max(0, paginationStart - MAX_VISIBLE_PAGES))}
+            disabled={paginationStart === 0}
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronLeft className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+          </button>
+        )}
+
+        {questions.slice(
+          paginationStart, 
+          Math.min(paginationStart + MAX_VISIBLE_PAGES, questions.length)
+        ).map((q, sliceIndex) => {
+          const index = paginationStart + sliceIndex;
           const isSubmitted = submittedAnswers[q.id] === true;
           const isAnswerCorrect = selectedAnswers[q.id] === q.correctAnswer;
           
@@ -232,18 +262,33 @@ export function Quiz({ questions, onComplete, url }: QuizProps) {
             <button
               key={index}
               onClick={() => setCurrentQuestionIndex(index)}
-              className={`w-8 h-8 rounded-full text-sm flex items-center justify-center ${
-                isSubmitted
-                  ? 'bg-indigo-600 dark:bg-indigo-500 text-white'
+              className={`w-8 h-8 rounded-full text-sm flex items-center justify-center transition-all ${
+                isSubmitted && isAnswerCorrect
+                  ? 'bg-green-600 dark:bg-green-500 text-white'
+                  : isSubmitted && !isAnswerCorrect
+                  ? 'bg-red-600 dark:bg-red-500 text-white'
                   : index === currentQuestionIndex
                   ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 border-2 border-indigo-600 dark:border-indigo-400'
-                  : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-600'
               }`}
             >
               {index + 1}
             </button>
           );
         })}
+
+        {questions.length > MAX_VISIBLE_PAGES && (
+          <button
+            onClick={() => setPaginationStart(Math.min(
+              questions.length - MAX_VISIBLE_PAGES,
+              paginationStart + MAX_VISIBLE_PAGES
+            ))}
+            disabled={paginationStart >= questions.length - MAX_VISIBLE_PAGES}
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+          </button>
+        )}
       </div>
     </div>
   );
