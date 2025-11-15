@@ -5,6 +5,7 @@ import { Quiz } from './components/Quiz';
 import { Results } from './components/Results';
 import { ThemeProvider } from './components/ThemeProvider';
 import { UrlInput } from './components/UrlInput';
+import { Login } from './components/Login';
 
 export type QuizQuestion = {
   id: string;
@@ -47,7 +48,7 @@ export type GenerateQuizRequest = {
   questionAmount?: number;
 }
 
-type Page = 'home' | 'quiz' | 'results' | 'profile';
+type Page = 'login' | 'home' | 'quiz' | 'results' | 'profile';
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
@@ -58,6 +59,15 @@ export default function App() {
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
   const [currentResult, setCurrentResult] = useState<QuizResult | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const authStatus = localStorage.getItem('isAuthenticated');
+    if (authStatus === 'true') {
+      setIsAuthenticated(true);
+      setCurrentPage('home');
+    }
+  }, []);
 
   // Load quiz results from localStorage on mount
   useEffect(() => {
@@ -174,12 +184,43 @@ export default function App() {
     setCurrentPage('quiz');
   };
 
+  const handleLoginButton = () => {
+    setCurrentPage('login');
+  };
+
+  const handleViewProfile = () => {
+    const authStatus = localStorage.getItem('isAuthenticated');
+    if (authStatus === 'false') {
+      setCurrentPage('login');
+    }
+	setCurrentPage('profile');
+  };
+
+  const handleLogin = ( isAnonymusUser: boolean ) => {
+    setCurrentPage('home');
+	if (!isAnonymusUser)
+	{
+		setIsAuthenticated(true);
+		localStorage.setItem('isAuthenticated', 'true');
+	}
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setCurrentPage('home');
+    localStorage.setItem('isAuthenticated', 'false');
+  };
+
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
-        <Navigation currentPage={currentPage} onNavigate={handleNavigate} />
-
+        <Navigation currentPage={currentPage} onLogout={handleLogout} onLogin={handleLoginButton} onNavigate={handleNavigate} isAuthenticated={isAuthenticated} />
+        
         <main className={`container mx-auto px-4 py-8 ${currentPage === 'profile' ? 'max-w-6xl' : 'max-w-4xl'}`}>
+          {currentPage === 'login' && (
+            <Login onLogin={handleLogin} />
+          )}
+
           {currentPage === 'home' && (
             <UrlInput onSubmit={startQuiz} />
           )}
@@ -197,7 +238,8 @@ export default function App() {
               result={currentResult}
               onRetryQuiz={handleRetryQuiz}
               onNewQuiz={handleNewQuiz}
-              onViewProfile={() => setCurrentPage('profile')}
+			  isAuth={isAuthenticated}
+              onViewProfile={handleViewProfile}
             />
           )}
 
