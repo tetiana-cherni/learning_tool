@@ -14,6 +14,8 @@ export interface QuizQuestion {
 export interface QuizResponse {
   success: boolean;
   data: {
+    title: string;
+    category: string;
     questions: QuizQuestion[];
   };
   questionCount: number;

@@ -18,6 +18,11 @@ export const QuizQuestionSchema = z.object({
 });
 
 export const QuizQuestionsSchema = z.object({
+  title: z.string().min(3).describe("Title of the quiz summarizing the topic"),
+  category: z
+    .string()
+    .min(3)
+    .describe("General category/domain (e.g., Programming, Biology)"),
   questions: z
     .array(QuizQuestionSchema)
     .min(MIN_QUESTION_AMOUNT)

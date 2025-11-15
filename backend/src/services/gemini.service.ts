@@ -76,15 +76,17 @@ ${contextSummary}
 """
 
 Instructions:
-1. Create exactly ${questionAmount} multiple-choice questions that test understanding of the key concepts from the context summary
-2. Each question must have exactly 4 options
-3. Ensure questions cover different aspects (main ideas, details, analysis, application)
-4. Provide clear explanations for correct answers that reference specific parts of the context summary
-5. Difficulty should be challenging but fair
+1. Create a concise and informative quiz "title" that summarizes the topic
+2. Choose a high-level "category" the quiz belongs to (e.g., Programming, Biology, History)
+3. Create exactly ${questionAmount} multiple-choice questions that test understanding of the key concepts from the context summary
+4. Each question must have exactly 4 options
+5. Ensure questions cover different aspects (main ideas, details, analysis, application)
+6. Provide clear explanations for correct answers that reference specific parts of the context summary
+7. Difficulty should be challenging but fair
 
 Output requirements:
-- Return JSON that strictly complies with the provided schema (the caller enforces it)
-- Do not include any text outside of JSON
+- Return JSON object with: { title: string, category: string, questions: Question[] }
+- The caller enforces a JSON schema; do not include any text outside of JSON
     `.trim();
   }
 
@@ -154,6 +156,14 @@ Output requirements:
     return {
       type: "object",
       properties: {
+        title: {
+          type: "string",
+          description: "Title of the quiz summarizing the topic",
+        },
+        category: {
+          type: "string",
+          description: "General category/domain (e.g., Programming, Biology)",
+        },
         questions: {
           type: "array",
           description: "Array of quiz questions",
@@ -199,7 +209,7 @@ Output requirements:
           },
         },
       },
-      required: ["questions"],
+      required: ["title", "category", "questions"],
       additionalProperties: false,
     } as const;
   }
