@@ -17,8 +17,13 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-2">
-            <BookOpen className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-            <span className="text-gray-900 dark:text-gray-100">LearnQuiz</span>
+            <button
+              onClick={() => onNavigate('home')}
+              className="flex items-center gap-2 text-gray-900 dark:text-gray-100 font-medium no-underline cursor-pointer"
+            >
+              <BookOpen className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+              <span>LearnQuiz</span>
+            </button>
           </div>
           
           <div className="flex gap-2">

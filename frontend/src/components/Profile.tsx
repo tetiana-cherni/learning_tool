@@ -263,9 +263,6 @@ export function Profile({ results, onStartNewQuiz, onUpdateResults, onViewResult
                           <Badge className="bg-indigo-50 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 px-2.5 py-0.5 rounded-md border-0">
                             {result.subject || 'Uncategorized'}
                           </Badge>
-                          <Badge variant="outline" className="text-gray-600 dark:text-gray-400 px-2.5 py-0.5 rounded-md border-gray-200 dark:border-gray-600">
-                            {domain}
-                          </Badge>
                         </div>
                         <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button
@@ -306,13 +303,13 @@ export function Profile({ results, onStartNewQuiz, onUpdateResults, onViewResult
                       </div>
 
                       {/* Meta info: Date left, questions count right */}
-                      <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                      <div className="flex items-center m-0 justify-between text-sm text-gray-500 dark:text-gray-400 mb-1">
                         <span>{formatDate(result.date)}</span>
                         <span>Questions: {result.totalQuestions}</span>
                       </div>
 
                       {/* Actions: View original left, Retry right */}
-                      <div className="flex items-center justify-between pt-2">
+                      <div className="flex items-center justify-between">
                         <a
                           href={result.url}
                           target="_blank"
@@ -320,7 +317,9 @@ export function Profile({ results, onStartNewQuiz, onUpdateResults, onViewResult
                           onClick={(e) => e.stopPropagation()}
                           className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline transition-colors"
                         >
-                          View original page
+                          <Badge variant="outline" className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 px-2.5 py-0.5 rounded-md border-gray-200 dark:border-gray-600">
+                            {domain}
+                          </Badge>
                         </a>
                         <Button
                           variant="ghost"
