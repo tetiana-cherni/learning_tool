@@ -1,15 +1,12 @@
 import { GoogleGenAI } from "@google/genai";
 import { configService } from "../config/config.service";
+import { QuizQuestionsSchema, QuizQuestions } from "../schemas/quiz.schema";
 import {
-  QuizQuestionsSchema,
-  QuizQuestions,
-  QuizQuestionsJsonSchema,
-} from "../schemas/quiz.schema";
+  MIN_QUESTION_AMOUNT,
+  MAX_QUESTION_AMOUNT,
+  DEFAULT_QUESTION_AMOUNT,
+} from "../constants/quiz.constants";
 
-/**
- * Service for interacting with Google Gemini AI
- * Implements Single Responsibility Principle - only handles Gemini API interactions
- */
 export class GeminiService {
   private readonly genAI: GoogleGenAI;
   private readonly modelName: string;
@@ -20,27 +17,26 @@ export class GeminiService {
     this.modelName = configService.getGeminiModel();
   }
 
-  /**
-   * Generate a quiz from a URL using Gemini with structured output
-   * Uses URL context tool to directly access and analyze content from the URL
-   * and structured schema to ensure consistent output format
-   *
-   * @param url - The URL to generate quiz questions from
-   * @returns Validated quiz questions
-   * @throws Error if URL is invalid, API call fails, or validation fails
-   */
-  public async generateQuizFromUrl(url: string): Promise<QuizQuestions> {
-	console.log(`using model ${this.modelName}`)
+  public async generateQuizFromUrl(
+    url: string,
+    questionAmount?: number
+  ): Promise<QuizQuestions> {
+    console.log(`using model ${this.modelName}`);
     this.validateUrl(url);
+    const qa = this.resolveQuestionAmount(questionAmount);
     try {
       const contextSummary = await this.fetchContextSummary(url);
-      const quizPrompt = this.createQuizFromContextPrompt(contextSummary, url);
+      const quizPrompt = this.createQuizFromContextPrompt(
+        contextSummary,
+        url,
+        qa
+      );
       const response2 = await this.genAI.models.generateContent({
         model: this.modelName,
         contents: [quizPrompt],
         config: {
           responseMimeType: "application/json",
-          responseJsonSchema: QuizQuestionsJsonSchema,
+          responseJsonSchema: this.buildQuizJsonSchema(qa),
         },
       });
 
@@ -50,15 +46,12 @@ export class GeminiService {
         throw new Error("No response text generated from Gemini API");
       }
 
-      return this.parseAndValidateResponse(generatedQuiz);
+      return this.parseAndValidateResponse(generatedQuiz, qa);
     } catch (error) {
       throw this.handleGenerationError(error);
     }
   }
 
-  /**
-   * Validate URL format
-   */
   private validateUrl(url: string): void {
     try {
       new URL(url);
@@ -67,39 +60,10 @@ export class GeminiService {
     }
   }
 
-  private createQuizPrompt(url: string): string {
-    return `
-You are an expert quiz creator. Analyze the content from the following URL and create an educational quiz based on its content.
-
-URL: ${url}
-
-Instructions:
-1. Carefully read and analyze the content from the URL provided above
-2. Create 5-7 multiple-choice questions that test understanding of the key concepts from the URL content
-3. Each question must have exactly 4 options
-4. Ensure questions cover different aspects of the content (main ideas, details, analysis, application)
-5. Make questions challenging but fair based on the actual content
-6. Provide clear explanations for correct answers that reference specific information from the URL
-7. Use diverse question types (factual recall, conceptual understanding, application-based)
-
-Requirements:
-- Questions should be clear and unambiguous
-- All options should be plausible based on the content
-- Explanations should be educational and cite the source material
-- Difficulty should be appropriate for the content level
-- Questions should test comprehension and critical thinking, not just memorization
-- Focus on the most important and interesting aspects of the content
-
-Generate the quiz following the specified JSON schema format.
-    `.trim();
-  }
-
-  /**
-   * Create a prompt that asks model to generate a quiz ONLY from a provided context summary
-   */
   private createQuizFromContextPrompt(
     contextSummary: string,
-    url: string
+    url: string,
+    questionAmount: number
   ): string {
     return `
 You are an expert quiz creator. Use ONLY the provided context summary (derived from the URL below) to create an educational multiple-choice quiz. Do not invent facts not present in the context.
@@ -112,23 +76,20 @@ ${contextSummary}
 """
 
 Instructions:
-1. Create 5-7 multiple-choice questions that test understanding of the key concepts from the context summary
-2. Each question must have exactly 4 options
-3. Ensure questions cover different aspects (main ideas, details, analysis, application)
-4. Provide clear explanations for correct answers that reference specific parts of the context summary
-5. Difficulty should be challenging but fair
+1. Create a concise and informative quiz "title" that summarizes the topic
+2. Choose a high-level "category" the quiz belongs to (e.g., Programming, Biology, History)
+3. Create exactly ${questionAmount} multiple-choice questions that test understanding of the key concepts from the context summary
+4. Each question must have exactly 4 options
+5. Ensure questions cover different aspects (main ideas, details, analysis, application)
+6. Provide clear explanations for correct answers that reference specific parts of the context summary
+7. Difficulty should be challenging but fair
 
 Output requirements:
-- Return JSON that strictly complies with the provided schema (the caller enforces it)
-- Do not include any text outside of JSON
+- Return JSON object with: { title: string, category: string, questions: Question[] }
+- The caller enforces a JSON schema; do not include any text outside of JSON
     `.trim();
   }
 
-  /**
-   * Use URL Context tool to fetch and summarize the content from the given URL.
-   * Tools cannot be combined with application/json structured outputs, so we first
-   * retrieve a concise, information-dense summary here.
-   */
   private async fetchContextSummary(url: string): Promise<string> {
     const prompt = `Read and analyze the content at the following URL and produce a concise, information-dense summary capturing key concepts, definitions, data points, and relationships. Avoid fluff and keep it factual. Include section headers if helpful. URL: ${url}`;
 
@@ -147,41 +108,8 @@ Output requirements:
     return text;
   }
 
-  /**
-   * Parse and validate Gemini response using Zod schema
-   */
-  private parseAndValidateResponse(responseText: string): QuizQuestions {
-    try {
-      const parsedData = JSON.parse(responseText);
-      const validatedData = QuizQuestionsSchema.parse(parsedData);
-
-      // Add unique IDs if not provided by the model
-      validatedData.questions = validatedData.questions.map(
-        (question, index) => ({
-          ...question,
-          id: question.id || `q_${Date.now()}_${index}`,
-        })
-      );
-
-      return validatedData;
-    } catch (error) {
-      if (error instanceof SyntaxError) {
-        throw new Error("Failed to parse Gemini response as JSON");
-      }
-      throw new Error(
-        `Validation failed: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-    }
-  }
-
-  /**
-   * Handle errors during quiz generation
-   */
   private handleGenerationError(error: unknown): Error {
     if (error instanceof Error) {
-      // Check for specific Gemini API errors
       if (error.message.includes("API key")) {
         return new Error("Invalid or missing Gemini API key");
       }
@@ -207,6 +135,108 @@ Output requirements:
     }
 
     return new Error("Quiz generation failed: Unknown error");
+  }
+
+  private resolveQuestionAmount(input?: number): number {
+    if (input === undefined) return DEFAULT_QUESTION_AMOUNT;
+    if (!Number.isInteger(input)) {
+      throw new Error(
+        `Invalid questionAmount: must be an integer between ${MIN_QUESTION_AMOUNT} and ${MAX_QUESTION_AMOUNT}`
+      );
+    }
+    if (input < MIN_QUESTION_AMOUNT || input > MAX_QUESTION_AMOUNT) {
+      throw new Error(
+        `Invalid questionAmount: must be an integer between ${MIN_QUESTION_AMOUNT} and ${MAX_QUESTION_AMOUNT}`
+      );
+    }
+    return input;
+  }
+
+  private buildQuizJsonSchema(questionAmount: number) {
+    return {
+      type: "object",
+      properties: {
+        title: {
+          type: "string",
+          description: "Title of the quiz summarizing the topic",
+        },
+        category: {
+          type: "string",
+          description: "General category/domain (e.g., Programming, Biology)",
+        },
+        questions: {
+          type: "array",
+          description: "Array of quiz questions",
+          minItems: questionAmount,
+          maxItems: questionAmount,
+          items: {
+            type: "object",
+            properties: {
+              id: {
+                type: "string",
+                description: "Unique identifier for the question",
+              },
+              question: {
+                type: "string",
+                description: "The quiz question text",
+              },
+              options: {
+                type: "array",
+                description: "Four answer options",
+                minItems: 4,
+                maxItems: 4,
+                items: { type: "string" },
+              },
+              correctAnswer: {
+                type: "integer",
+                description: "Index of the correct answer (0-3)",
+                minimum: 0,
+                maximum: 3,
+              },
+              explanation: {
+                type: "string",
+                description: "Explanation of the correct answer",
+              },
+            },
+            required: [
+              "id",
+              "question",
+              "options",
+              "correctAnswer",
+              "explanation",
+            ],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ["title", "category", "questions"],
+      additionalProperties: false,
+    } as const;
+  }
+
+  private parseAndValidateResponse(
+    responseText: string,
+    expectedCount: number
+  ): QuizQuestions {
+    const data = this.parseAndValidateResponseBase(responseText);
+    if (data.questions.length !== expectedCount) {
+      throw new Error(
+        `Validation failed: expected ${expectedCount} questions, received ${data.questions.length}`
+      );
+    }
+    return data;
+  }
+
+  private parseAndValidateResponseBase(responseText: string): QuizQuestions {
+    const parsedData = JSON.parse(responseText);
+    const validatedData = QuizQuestionsSchema.parse(parsedData);
+    validatedData.questions = validatedData.questions.map(
+      (question, index) => ({
+        ...question,
+        id: question.id || `q_${Date.now()}_${index}`,
+      })
+    );
+    return validatedData;
   }
 }
 

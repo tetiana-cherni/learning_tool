@@ -1,15 +1,17 @@
 import { Request, Response } from "express";
 import { geminiService } from "../services/gemini.service";
+import {
+  MIN_QUESTION_AMOUNT,
+  MAX_QUESTION_AMOUNT,
+} from "../constants/quiz.constants";
 
 export class QuizController {
-  /**
-   * Generate quiz from URL endpoint handler
-   * POST /api/quiz/generate
-   * Body: { url: string }
-   */
   public async generateQuiz(req: Request, res: Response): Promise<void> {
     try {
-      const { url } = req.body;
+      const { url, questionAmount } = req.body as {
+        url?: unknown;
+        questionAmount?: unknown;
+      };
 
       if (!url) {
         res.status(400).json({
@@ -27,11 +29,38 @@ export class QuizController {
         return;
       }
 
-      const quiz = await geminiService.generateQuizFromUrl(url);
+      let qa: number | undefined = undefined;
+      if (questionAmount !== undefined) {
+        if (
+          typeof questionAmount !== "number" ||
+          !Number.isInteger(questionAmount)
+        ) {
+          res.status(400).json({
+            error: "Bad Request",
+            message: "questionAmount must be an integer",
+          });
+          return;
+        }
+        if (
+          questionAmount < MIN_QUESTION_AMOUNT ||
+          questionAmount > MAX_QUESTION_AMOUNT
+        ) {
+          res.status(400).json({
+            error: "Bad Request",
+            message: `questionAmount must be between ${MIN_QUESTION_AMOUNT} and ${MAX_QUESTION_AMOUNT}`,
+          });
+          return;
+        }
+        qa = questionAmount;
+      }
+
+      const quiz = await geminiService.generateQuizFromUrl(url, qa);
+      const questionCount = quiz.questions.length;
 
       res.status(200).json({
         success: true,
         data: quiz,
+        questionCount,
       });
     } catch (error) {
       this.handleError(error, res);
@@ -42,6 +71,13 @@ export class QuizController {
     console.error("Quiz generation error:", error);
 
     if (error instanceof Error) {
+      if (error.message.includes("Invalid questionAmount")) {
+        res.status(400).json({
+          error: "Bad Request",
+          message: error.message,
+        });
+        return;
+      }
       if (error.message.includes("Invalid URL")) {
         res.status(400).json({
           error: "Bad Request",

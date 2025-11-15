@@ -1,0 +1,3 @@
+export const MIN_QUESTION_AMOUNT = 1;
+export const MAX_QUESTION_AMOUNT = 100;
+export const DEFAULT_QUESTION_AMOUNT = 8;
