@@ -27,7 +27,7 @@ type ProfileProps = {
   onStartNewQuiz: () => void;
   onUpdateResults: (results: QuizResult[]) => void;
   onViewResult: (result: QuizResult) => void;
-  onRetryQuiz: (url: string, questionCount: number, subject: string) => void;
+  onRetryQuiz: (url: string, questionCount: number, subject: string, title: string) => void;
 };
 
 export function Profile({ results, onStartNewQuiz, onUpdateResults, onViewResult, onRetryQuiz }: ProfileProps) {
@@ -327,7 +327,7 @@ export function Profile({ results, onStartNewQuiz, onUpdateResults, onViewResult
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            onRetryQuiz(result.url, result.totalQuestions, result.subject);
+                            onRetryQuiz(result.url, result.totalQuestions, result.subject, result.title);
                           }}
                           className="h-8 px-3 gap-1.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg"
                         >
