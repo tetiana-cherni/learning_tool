@@ -9,9 +9,10 @@ type ResultsProps = {
   onRetake: () => void;
   onNewQuiz: () => void;
   onViewProfile: () => void;
+  isAuth: boolean;
 };
 
-export function Results({ result, onRetake, onNewQuiz, onViewProfile }: ResultsProps) {
+export function Results({ result, onRetake, onNewQuiz, onViewProfile, isAuth }: ResultsProps) {
   const [showDetailedResults, setShowDetailedResults] = useState(false);
   const percentage = Math.round((result.score / result.totalQuestions) * 100);
   const isPerfect = percentage === 100;
@@ -61,7 +62,11 @@ export function Results({ result, onRetake, onNewQuiz, onViewProfile }: ResultsP
         
         <Button onClick={onViewProfile} variant="outline" className="gap-2 dark:border-gray-600 dark:hover:bg-gray-800">
           <User className="w-4 h-4" />
-          View Profile
+		  {
+			isAuth
+			? "View Profile"
+			: "Create profile"
+		  }
         </Button>
       </div>
 

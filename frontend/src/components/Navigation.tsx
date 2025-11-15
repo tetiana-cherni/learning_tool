@@ -1,16 +1,23 @@
-import { Home, User, BookOpen, Moon, Sun } from 'lucide-react';
+import { Home, User, BookOpen, Moon, Sun, LogOut } from 'lucide-react';
 import { Button } from './ui/button';
 import { useTheme } from './ThemeProvider';
 
-type Page = 'home' | 'quiz' | 'results' | 'profile';
+type Page = 'login' | 'home' | 'quiz' | 'results' | 'profile';
 
 type NavigationProps = {
   currentPage: Page;
   onNavigate: (page: Page) => void;
+  onLogout?: () => void;
+  onLogin?: () => void;
+  isAuthenticated?: boolean;
 };
 
-export function Navigation({ currentPage, onNavigate }: NavigationProps) {
+export function Navigation({ currentPage, onNavigate, onLogout, onLogin, isAuthenticated  }: NavigationProps) {
   const { theme, toggleTheme } = useTheme();
+
+	if (currentPage === 'login') {
+		return null;
+	}
 
   return (
     <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm">
@@ -30,15 +37,18 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
               <Home className="w-4 h-4" />
               Home
             </Button>
-            
-            <Button
-              variant={currentPage === 'profile' ? 'default' : 'ghost'}
-              onClick={() => onNavigate('profile')}
-              className="gap-2"
-            >
-              <User className="w-4 h-4" />
-              Profile
-            </Button>
+			{
+				isAuthenticated && (
+				<Button
+				variant={currentPage === 'profile' ? 'default' : 'ghost'}
+				onClick={() => onNavigate('profile')}
+				className="gap-2"
+				>
+				<User className="w-4 h-4" />
+				Profile
+				</Button>
+				)
+			}
 
             <Button
               variant="ghost"
@@ -52,6 +62,29 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
                 <Sun className="w-4 h-4" />
               )}
             </Button>
+
+			  {isAuthenticated && onLogout && (
+              <Button
+                variant="ghost"
+                onClick={onLogout}
+                className="gap-2"
+                aria-label="Logout"
+              >
+                <LogOut className="w-4 h-4" />
+              </Button>
+            )}
+
+			 {!isAuthenticated && (
+              <Button
+                variant="ghost"
+                onClick={onLogin}
+                className="gap-2"
+                aria-label="Logout"
+              >
+                Login
+              </Button>
+            )}
+
           </div>
         </div>
       </div>
