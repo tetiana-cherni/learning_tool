@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
-import { CheckCircle2, Circle, Clock, ExternalLink, XCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { CheckCircle2, ChevronLeft, ChevronRight, Circle, Clock, ExternalLink, XCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { QuizQuestion } from '../App';
 import { Button } from './ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Progress } from './ui/progress';
-import { QuizQuestion } from '../App';
 
 type QuizProps = {
   questions: QuizQuestion[];
@@ -68,13 +68,13 @@ export function Quiz({ questions, onComplete, url }: QuizProps) {
       [currentQuestion.id]: true,
     });
     
-    // Automatically navigate to next question or complete quiz
+    // Automatically navigate to next question or complete quiz after 1 second
     if (currentQuestionIndex < questions.length - 1) {
       setTimeout(() => {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
-      }, 100);
+      }, 2000);
     } else {
-      // All questions answered, submit quiz
+      // All questions answered, submit quiz after 1 second
       setTimeout(() => {
         const score = questions.reduce((acc, question) => {
           if (selectedAnswers[question.id] === question.correctAnswer) {
@@ -85,7 +85,7 @@ export function Quiz({ questions, onComplete, url }: QuizProps) {
 
         const timeSpent = Math.floor((Date.now() - startTime) / 1000);
         onComplete(score, timeSpent, selectedAnswers);
-      }, 100);
+      }, 2000);
     }
   };
 
