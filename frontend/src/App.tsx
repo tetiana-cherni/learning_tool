@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Navigation } from './components/Navigation';
 import { Profile } from './components/Profile';
 import { Quiz } from './components/Quiz';
+import { QuizSkeleton } from './components/QuizSkeleton';
 import { Results } from './components/Results';
 import { ThemeProvider } from './components/ThemeProvider';
 import { UrlInput } from './components/UrlInput';
@@ -58,6 +59,7 @@ export default function App() {
   const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   const [quizResults, setQuizResults] = useState<QuizResult[]>([]);
   const [currentResult, setCurrentResult] = useState<QuizResult | null>(null);
+  const [isLoadingQuiz, setIsLoadingQuiz] = useState(false);
 
   // Load quiz results from localStorage on mount
   useEffect(() => {
@@ -83,7 +85,36 @@ export default function App() {
     localStorage.setItem('quizResults', JSON.stringify(quizResults));
   }, [quizResults]);
 
-  const fetchQuizFromApi = async (url: string, questionAmount: number) => {
+  const fetchQuizFromApi = async (url: string, questionAmount: number): Promise<QuizResponse | undefined> => {
+    // // Simulate API delay (2 seconds) - COMMENT OUT FOR REAL API
+    // await new Promise(resolve => setTimeout(resolve, 3000));
+    
+    // // Mock response for testing
+    // const mockQuestions: QuizQuestion[] = Array.from({ length: questionAmount }, (_, i) => ({
+    //   id: String(i + 1),
+    //   question: `Sample question ${i + 1} about the content`,
+    //   options: [
+    //     'Option A',
+    //     'Option B',
+    //     'Option C',
+    //     'Option D'
+    //   ],
+    //   correctAnswer: 0,
+    //   explanation: 'This is a sample explanation for the question.'
+    // }));
+
+    // const mockResponse: QuizResponse = {
+    //   success: true,
+    //   data: {
+    //     title: 'Sample Quiz Title',
+    //     category: 'General Knowledge',
+    //     questions: mockQuestions
+    //   },
+    //   questionCount: mockQuestions.length
+    // };
+    
+    // return mockResponse;
+
     try {
       const response = await fetch('http://localhost:3000/api/quiz/generate', {
         method: 'POST',
@@ -104,12 +135,16 @@ export default function App() {
       return data;
     } catch (error) {
       console.error('API call failed:', error);
+      return undefined;
     }
   };
 
-  const startQuiz = async (url: string, questionCount: number, subject: string) => {
+  const startQuiz = async (url: string, questionCount: number) => {
     setCurrentUrl(url);
+    setTotalQuestions(questionCount);
 
+    setIsLoadingQuiz(true);
+    setCurrentPage('quiz');
     const response: QuizResponse | undefined = await fetchQuizFromApi(url, questionCount);
 
     const title = response?.data.title ?? "";
@@ -123,7 +158,7 @@ export default function App() {
 
     const questions = response?.data?.questions ?? [];
     setQuizQuestions(questions);
-    setCurrentPage('quiz');
+    setIsLoadingQuiz(false);
   };
 
   const handleQuizComplete = (score: number, timeSpent: number, selectedAnswers: Record<string, number>) => {
@@ -167,11 +202,12 @@ export default function App() {
     setCurrentSubject(subject);
     setCurrentTitle(title);
     setTotalQuestions(questionCount);
-
+    setIsLoadingQuiz(true);
+    setCurrentPage('quiz');
     const response: QuizResponse | undefined = await fetchQuizFromApi(url, questionCount);
     const questions = response?.data?.questions ?? [];
     setQuizQuestions(questions);
-    setCurrentPage('quiz');
+    setIsLoadingQuiz(false);
   };
 
   return (
@@ -185,11 +221,15 @@ export default function App() {
           )}
 
           {currentPage === 'quiz' && (
-            <Quiz
-              questions={quizQuestions}
-              onComplete={handleQuizComplete}
-              url={currentUrl}
-            />
+            isLoadingQuiz ? (
+              <QuizSkeleton url={currentUrl} questionCount={totalQuestions} />
+            ) : (
+              <Quiz 
+                questions={quizQuestions} 
+                onComplete={handleQuizComplete}
+                url={currentUrl}
+              />
+            )
           )}
 
           {currentPage === 'results' && currentResult && (
