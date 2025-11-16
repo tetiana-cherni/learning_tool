@@ -7,7 +7,6 @@ import { Results } from './components/Results';
 import { ThemeProvider } from './components/ThemeProvider';
 import { UrlInput } from './components/UrlInput';
 import { useAuth0 } from "@auth0/auth0-react";
-import createAuth0Client from "@auth0/auth0-spa-js";
 
 export type QuizQuestion = {
   id: string;
@@ -96,37 +95,9 @@ export default function App() {
   }, [quizResults]);
 
   const fetchQuizFromApi = async (url: string, questionAmount: number): Promise<QuizResponse | undefined> => {
-    // // Simulate API delay (2 seconds) - COMMENT OUT FOR REAL API
-    // await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    // // Mock response for testing
-    // const mockQuestions: QuizQuestion[] = Array.from({ length: questionAmount }, (_, i) => ({
-    //   id: String(i + 1),
-    //   question: `Sample question ${i + 1} about the content`,
-    //   options: [
-    //     'Option A',
-    //     'Option B',
-    //     'Option C',
-    //     'Option D'
-    //   ],
-    //   correctAnswer: 0,
-    //   explanation: 'This is a sample explanation for the question.'
-    // }));
-
-    // const mockResponse: QuizResponse = {
-    //   success: true,
-    //   data: {
-    //     title: 'Sample Quiz Title',
-    //     category: 'General Knowledge',
-    //     questions: mockQuestions
-    //   },
-    //   questionCount: mockQuestions.length
-    // };
-    
-    // return mockResponse;
-
     try {
-      const response = await fetch('http://localhost:3000/api/quiz/generate', {
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const response = await fetch(`${apiUrl}/api/quiz/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -254,10 +225,6 @@ export default function App() {
         <Navigation currentPage={currentPage} onLogout={handleLogout} onLogin={handleLogin} onNavigate={handleNavigate} isAuthenticated={isAuthenticated} />
         
         <main className={`container mx-auto px-4 py-8 ${currentPage === 'profile' ? 'max-w-6xl' : 'max-w-4xl'}`}>
-          {currentPage === 'login' && (
-            <Login onLogin={handleLogin} />
-          )}
-
           {currentPage === 'home' && (
             <UrlInput onSubmit={startQuiz} />
           )}
