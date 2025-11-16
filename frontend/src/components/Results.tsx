@@ -73,7 +73,7 @@ export function Results({ result, onRetryQuiz, onNewQuiz, onViewProfile, isAuth 
         </Button>
       </div>
 
-      <Card className="shadow-lg mb-6 dark:bg-gray-800 dark:border-gray-700">
+      <Card className="shadow-lg mb-6 dark:bg-gray-800 dark:border-gray-700 gap-0">
         <CardHeader className="text-center pb-4">
           <CardTitle className="text-gray-900 dark:text-gray-100">{result.title}</CardTitle>
           <CardDescription className="break-all dark:text-gray-400">{result.url}</CardDescription>
@@ -128,17 +128,6 @@ export function Results({ result, onRetryQuiz, onNewQuiz, onViewProfile, isAuth 
 
         </CardContent>
       </Card>
-
-      {!isPass && (
-        <div className="mt-6 p-4 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg">
-          <h3 className="text-sm text-amber-900 dark:text-amber-200 mb-2">Tips for Improvement:</h3>
-          <ul className="text-sm text-amber-800 dark:text-amber-300 space-y-1 list-disc list-inside">
-            <li>Review the source material carefully</li>
-            <li>Take notes while reading the content</li>
-            <li>Try the quiz again to reinforce your learning</li>
-          </ul>
-        </div>
-      )}
 
       <div className="mt-6 text-center">
         <Button 
