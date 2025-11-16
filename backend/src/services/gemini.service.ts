@@ -19,20 +19,22 @@ export class GeminiService {
 
   public async generateQuizFromUrl(
     url: string,
-    questionAmount?: number
+    questionAmount?: number,
+    modelOverride?: string
   ): Promise<QuizQuestions> {
-    console.log(`using model ${this.modelName}`);
+    const modelToUse = modelOverride ?? this.modelName;
+    console.log(`using model ${modelToUse}`);
     this.validateUrl(url);
     const qa = this.resolveQuestionAmount(questionAmount);
     try {
-      const contextSummary = await this.fetchContextSummary(url);
+      const contextSummary = await this.fetchContextSummary(url, modelToUse);
       const quizPrompt = this.createQuizFromContextPrompt(
         contextSummary,
         url,
         qa
       );
       const response2 = await this.genAI.models.generateContent({
-        model: this.modelName,
+        model: modelToUse,
         contents: [quizPrompt],
         config: {
           responseMimeType: "application/json",
@@ -90,11 +92,14 @@ Output requirements:
     `.trim();
   }
 
-  private async fetchContextSummary(url: string): Promise<string> {
+  private async fetchContextSummary(
+    url: string,
+    modelName?: string
+  ): Promise<string> {
     const prompt = `Read and analyze the content at the following URL and produce a concise, information-dense summary capturing key concepts, definitions, data points, and relationships. Avoid fluff and keep it factual. Include section headers if helpful. URL: ${url}`;
 
     const response = await this.genAI.models.generateContent({
-      model: this.modelName,
+      model: modelName ?? this.modelName,
       contents: [prompt],
       config: {
         tools: [{ urlContext: {} }],
