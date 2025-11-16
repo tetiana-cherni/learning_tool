@@ -23,10 +23,13 @@ export function Navigation({ currentPage, onNavigate, onLogout, onLogin, isAuthe
     <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="flex items-center justify-between h-16">
-          <div className="flex items-center gap-2">
-            <BookOpen className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-            <span className="text-gray-900 dark:text-gray-100">LearnQuiz</span>
-          </div>
+            <button
+              onClick={() => onNavigate('home')}
+              className="flex items-center gap-2 text-gray-900 dark:text-gray-100 font-medium no-underline cursor-pointer"
+            >
+              <BookOpen className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+              <span>GENquiZ</span>
+            </button>
 
           <div className="flex gap-2">
             <Button
@@ -54,7 +57,7 @@ export function Navigation({ currentPage, onNavigate, onLogout, onLogin, isAuthe
               <Button
                 variant="ghost"
                 onClick={onLogout}
-                className="gap-2"
+                className="gap-2 cursor-pointer"
                 aria-label="Logout"
               >
                 <LogOut className="w-4 h-4" />
@@ -65,7 +68,7 @@ export function Navigation({ currentPage, onNavigate, onLogout, onLogin, isAuthe
               <Button
                 variant="ghost"
                 onClick={onLogin}
-                className="gap-2"
+                className="gap-2 cursor-pointer"
                 aria-label="Logout"
               >
                 Login
@@ -75,7 +78,7 @@ export function Navigation({ currentPage, onNavigate, onLogout, onLogin, isAuthe
 			<Button
               variant="ghost"
               onClick={toggleTheme}
-              className="gap-2"
+              className="gap-2 cursor-pointer"
               aria-label="Toggle theme"
             >
               {theme === 'light' ? (
