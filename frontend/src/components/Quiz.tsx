@@ -72,7 +72,7 @@ export function Quiz({ questions, onComplete, url }: QuizProps) {
     if (currentQuestionIndex < questions.length - 1) {
       setTimeout(() => {
         setCurrentQuestionIndex(currentQuestionIndex + 1);
-      }, 2000);
+      }, 1000);
     } else {
       // All questions answered, submit quiz after 1 second
       setTimeout(() => {
@@ -85,7 +85,7 @@ export function Quiz({ questions, onComplete, url }: QuizProps) {
 
         const timeSpent = Math.floor((Date.now() - startTime) / 1000);
         onComplete(score, timeSpent, selectedAnswers);
-      }, 2000);
+      }, 1000);
     }
   };
 
