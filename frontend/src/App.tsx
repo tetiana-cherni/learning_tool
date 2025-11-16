@@ -86,36 +86,35 @@ export default function App() {
   }, [quizResults]);
 
   const fetchQuizFromApi = async (url: string, questionAmount: number): Promise<QuizResponse | undefined> => {
-    // Simulate API delay (2 seconds) - COMMENT OUT FOR REAL API
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    // // Simulate API delay (2 seconds) - COMMENT OUT FOR REAL API
+    // await new Promise(resolve => setTimeout(resolve, 3000));
     
-    // Mock response for testing
-    const mockQuestions: QuizQuestion[] = Array.from({ length: questionAmount }, (_, i) => ({
-      id: String(i + 1),
-      question: `Sample question ${i + 1} about the content`,
-      options: [
-        'Option A',
-        'Option B',
-        'Option C',
-        'Option D'
-      ],
-      correctAnswer: 0,
-      explanation: 'This is a sample explanation for the question.'
-    }));
+    // // Mock response for testing
+    // const mockQuestions: QuizQuestion[] = Array.from({ length: questionAmount }, (_, i) => ({
+    //   id: String(i + 1),
+    //   question: `Sample question ${i + 1} about the content`,
+    //   options: [
+    //     'Option A',
+    //     'Option B',
+    //     'Option C',
+    //     'Option D'
+    //   ],
+    //   correctAnswer: 0,
+    //   explanation: 'This is a sample explanation for the question.'
+    // }));
 
-    const mockResponse: QuizResponse = {
-      success: true,
-      data: {
-        title: 'Sample Quiz Title',
-        category: 'General Knowledge',
-        questions: mockQuestions
-      },
-      questionCount: mockQuestions.length
-    };
+    // const mockResponse: QuizResponse = {
+    //   success: true,
+    //   data: {
+    //     title: 'Sample Quiz Title',
+    //     category: 'General Knowledge',
+    //     questions: mockQuestions
+    //   },
+    //   questionCount: mockQuestions.length
+    // };
     
-    return mockResponse;
+    // return mockResponse;
 
-    /* REAL API CALL - UNCOMMENT TO USE
     try {
       const response = await fetch('http://localhost:3000/api/quiz/generate', {
         method: 'POST',
@@ -138,7 +137,6 @@ export default function App() {
       console.error('API call failed:', error);
       return undefined;
     }
-    */
   };
 
   const startQuiz = async (url: string, questionCount: number) => {
