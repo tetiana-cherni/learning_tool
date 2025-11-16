@@ -5,7 +5,6 @@ import { Results } from './components/Results';
 import { Profile } from './components/Profile';
 import { Navigation } from './components/Navigation';
 import { ThemeProvider } from './components/ThemeProvider';
-import { Login } from './components/Login';
 import { useAuth0 } from "@auth0/auth0-react";
 import createAuth0Client from "@auth0/auth0-spa-js";
 
