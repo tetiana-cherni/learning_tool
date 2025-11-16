@@ -6,7 +6,6 @@ import { QuizSkeleton } from './components/QuizSkeleton';
 import { Results } from './components/Results';
 import { ThemeProvider } from './components/ThemeProvider';
 import { UrlInput } from './components/UrlInput';
-import { Login } from './components/Login';
 import { useAuth0 } from "@auth0/auth0-react";
 import createAuth0Client from "@auth0/auth0-spa-js";
 
