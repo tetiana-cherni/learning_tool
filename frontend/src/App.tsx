@@ -191,16 +191,13 @@ export default function App() {
     setIsLoadingQuiz(false);
   };
 
-  const handleLoginButton = () => {
-    setCurrentPage('login');
-  };
-
   const handleViewProfile = () => {
-    const authStatus = localStorage.getItem('isAuthenticated');
-    if (authStatus === 'false') {
-      setCurrentPage('login');
-    }
-	setCurrentPage('profile');
+    if (!isAuthenticated) {
+		loginWithRedirect();
+	}
+	else {
+		setCurrentPage('profile');
+	}
   };
 
   const handleLogin = ( isAnonymusUser: boolean ) => {

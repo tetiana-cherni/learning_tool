@@ -53,17 +53,17 @@ export function Results({ result, onRetryQuiz, onNewQuiz, onViewProfile, isAuth 
         <Button onClick={(e) => {
                             e.stopPropagation();
                             onRetryQuiz(result.url, result.totalQuestions, result.subject, result.title);
-                          }} variant="outline" className="gap-2 dark:border-gray-600 dark:hover:bg-gray-800">
+                          }} variant="outline" className="gap-2 dark:border-gray-600 dark:hover:bg-gray-800 cursor-pointer">
           <RotateCcw className="w-4 h-4" />
           Retake Quiz
         </Button>
         
-        <Button onClick={onNewQuiz} className="gap-2">
+        <Button onClick={onNewQuiz} className="gap-2 cursor-pointer">
           <Plus className="w-4 h-4" />
           New Quiz
         </Button>
         
-        <Button onClick={onViewProfile} variant="outline" className="gap-2 dark:border-gray-600 dark:hover:bg-gray-800">
+        <Button onClick={onViewProfile} variant="outline" className="gap-2 dark:border-gray-600 dark:hover:bg-gray-800 cursor-pointer">
           <User className="w-4 h-4" />
 		  {
 			isAuth
@@ -76,7 +76,16 @@ export function Results({ result, onRetryQuiz, onNewQuiz, onViewProfile, isAuth 
       <Card className="shadow-lg mb-6 dark:bg-gray-800 dark:border-gray-700 gap-0">
         <CardHeader className="text-center pb-4">
           <CardTitle className="text-gray-900 dark:text-gray-100">{result.title}</CardTitle>
-          <CardDescription className="break-all dark:text-gray-400">{result.url}</CardDescription>
+          <CardDescription className="break-all dark:text-gray-400">
+            <a 
+              href={result.url} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="hover:text-indigo-600 dark:hover:text-indigo-400 underline"
+            >
+              {result.url}
+            </a>
+          </CardDescription>
           {result.subject && (
             <div className="flex items-center justify-center gap-2 mt-2 text-sm text-gray-600 dark:text-gray-400">
               <Tag className="w-4 h-4" />
@@ -133,7 +142,7 @@ export function Results({ result, onRetryQuiz, onNewQuiz, onViewProfile, isAuth 
         <Button 
           onClick={() => setShowDetailedResults(!showDetailedResults)}
           variant="outline"
-          className="gap-2 dark:border-gray-600 dark:hover:bg-gray-800"
+          className="gap-2 dark:border-gray-600 dark:hover:bg-gray-800 cursor-pointer"
         >
           {showDetailedResults ? 'Hide results' : 'Show result'}
         </Button>
@@ -141,7 +150,6 @@ export function Results({ result, onRetryQuiz, onNewQuiz, onViewProfile, isAuth 
 
       {showDetailedResults && result.questions && result.selectedAnswers && (
         <div className="mt-6 space-y-4">
-          <h2 className="text-gray-900 dark:text-gray-100 text-center mb-4">Detailed Results</h2>
           {result.questions.map((question, index) => {
             const userAnswer = result.selectedAnswers![question.id];
             const isCorrect = userAnswer === question.correctAnswer;

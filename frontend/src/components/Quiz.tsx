@@ -166,7 +166,7 @@ export function Quiz({ questions, onComplete, url }: QuizProps) {
             
             let buttonStyle = '';
             let iconComponent = <Circle className="w-5 h-5 text-gray-400 flex-shrink-0" />;
-            let textStyle = 'text-gray-700';
+            let textStyle = '';
 
             if (hasSubmitted) {
               // After submission, show correct answer in green
@@ -219,7 +219,7 @@ export function Quiz({ questions, onComplete, url }: QuizProps) {
         </CardContent>
       </Card>
 
-      <div className="flex justify-between mt-6">
+      <div className="flex justify-between mt-6 cursor-pointer">
         <Button
           onClick={handlePrevious}
           disabled={currentQuestionIndex === 0}
@@ -232,7 +232,7 @@ export function Quiz({ questions, onComplete, url }: QuizProps) {
           <Button
             onClick={handleSubmitAnswer}
             disabled={!hasSelected}
-            className="bg-indigo-600 hover:bg-indigo-700"
+            className="bg-indigo-600 hover:bg-indigo-700 cursor-pointer"
           >
             Submit
           </Button>
@@ -244,7 +244,7 @@ export function Quiz({ questions, onComplete, url }: QuizProps) {
           <button
             onClick={() => setPaginationStart(Math.max(0, paginationStart - MAX_VISIBLE_PAGES))}
             disabled={paginationStart === 0}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4 text-gray-600 dark:text-gray-400" />
           </button>
@@ -262,7 +262,7 @@ export function Quiz({ questions, onComplete, url }: QuizProps) {
             <button
               key={index}
               onClick={() => setCurrentQuestionIndex(index)}
-              className={`w-8 h-8 rounded-full text-sm flex items-center justify-center transition-all ${
+              className={`w-8 h-8 rounded-full text-sm flex items-center justify-center transition-all cursor-pointer ${
                 isSubmitted && isAnswerCorrect
                   ? 'bg-green-600 dark:bg-green-500 text-white'
                   : isSubmitted && !isAnswerCorrect
@@ -284,7 +284,7 @@ export function Quiz({ questions, onComplete, url }: QuizProps) {
               paginationStart + MAX_VISIBLE_PAGES
             ))}
             disabled={paginationStart >= questions.length - MAX_VISIBLE_PAGES}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
           >
             <ChevronRight className="w-4 h-4 text-gray-600 dark:text-gray-400" />
           </button>
