@@ -14,6 +14,7 @@ export function UrlInput({ onSubmit }: UrlInputProps) {
   const [url, setUrl] = useState('');
   const [error, setError] = useState('');
   const [questionCount, setQuestionCount] = useState('5');
+  const [showInfo, setShowInfo] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,13 +48,10 @@ export function UrlInput({ onSubmit }: UrlInputProps) {
               <Sparkles className="w-8 h-8 text-indigo-600 dark:text-indigo-400" />
             </div>
           </div>
-          <CardTitle className="text-gray-900 dark:text-gray-100">Automated Learning Quiz</CardTitle>
-          <CardDescription className="dark:text-gray-400">
-            Enter a URL to any article or webpage, and we'll generate a personalized quiz to test your understanding
-          </CardDescription>
+          <CardTitle className="text-3xl text-gray-900 dark:text-gray-100">Automated Learning Quiz</CardTitle>
         </CardHeader>
         
-        <CardContent>
+        <CardContent  className="flex flex-col space-y-4">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="url" className="dark:text-gray-200">Article URL</Label>
@@ -90,7 +88,7 @@ export function UrlInput({ onSubmit }: UrlInputProps) {
               <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
             )}
 
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full bg-indigo-550 hover:bg-indigo-550 cursor-pointer">
               Generate Quiz
             </Button>
 
@@ -99,7 +97,7 @@ export function UrlInput({ onSubmit }: UrlInputProps) {
                 <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">or</span>
+                <span className="px-2 dark:bg-gray-800 text-gray-500 dark:text-gray-400">or</span>
               </div>
             </div>
 
@@ -107,21 +105,36 @@ export function UrlInput({ onSubmit }: UrlInputProps) {
               type="button"
               variant="outline"
               onClick={handleTryExample}
-              className="w-full dark:border-gray-600 dark:hover:bg-gray-700"
+              className="w-full dark:border-gray-600 dark:hover:bg-blue-850 cursor-pointer"
             >
               Try Example URL
             </Button>
           </form>
 
-          <div className="mt-8 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-100 dark:border-blue-800">
-            <h3 className="text-sm text-blue-900 dark:text-blue-200 mb-2">How it works:</h3>
-            <ol className="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-decimal list-inside">
-              <li>Enter the URL of an article you want to learn from</li>
-              <li>Choose how many questions you want in your quiz</li>
-              <li>Our system extracts and analyzes the content</li>
-              <li>Take the automatically generated quiz</li>
-              <li>View your results and track your progress</li>
-            </ol>
+          <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowInfo(!showInfo)}
+              className="w-full dark:border-gray-600 dark:hover:bg-blue-850 cursor-pointer"
+            >
+              How it works
+            </Button>
+
+             <div
+            className={`overflow-hidden transition-all duration-300 ease-in-out
+              ${showInfo ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+            >
+            {showInfo && (
+              <div className="p-4 rounded-lg dark:bg-gray-800 dark:border-gray-700">
+                  <ol className="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-decimal list-inside">
+                    <li>Enter the URL of an article you want to learn from</li>
+                    <li>Choose how many questions you want in your quiz</li>
+                    <li>Our system extracts and analyzes the content</li>
+                    <li>Take the automatically generated quiz</li>
+                    <li>View your results and track your progress</li>
+                  </ol>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

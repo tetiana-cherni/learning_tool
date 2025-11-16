@@ -17,15 +17,20 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-2">
-            <BookOpen className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-            <span className="text-gray-900 dark:text-gray-100">LearnQuiz</span>
+            <button
+              onClick={() => onNavigate('home')}
+              className="flex items-center gap-2 text-gray-900 dark:text-gray-100 font-medium no-underline cursor-pointer"
+            >
+              <BookOpen className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+              <span>LearnQuiz</span>
+            </button>
           </div>
           
           <div className="flex gap-2">
             <Button
               variant={currentPage === 'home' ? 'default' : 'ghost'}
               onClick={() => onNavigate('home')}
-              className="gap-2"
+              className="gap-2 cursor-pointer"
             >
               <Home className="w-4 h-4" />
               Home
@@ -34,7 +39,7 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
             <Button
               variant={currentPage === 'profile' ? 'default' : 'ghost'}
               onClick={() => onNavigate('profile')}
-              className="gap-2"
+              className="gap-2 cursor-pointer"
             >
               <User className="w-4 h-4" />
               Profile
@@ -43,7 +48,7 @@ export function Navigation({ currentPage, onNavigate }: NavigationProps) {
             <Button
               variant="ghost"
               onClick={toggleTheme}
-              className="gap-2"
+              className="gap-2 cursor-pointer"
               aria-label="Toggle theme"
             >
               {theme === 'light' ? (
